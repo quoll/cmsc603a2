@@ -98,14 +98,12 @@ float computeAccuracy(int* confusionMatrix, ArffData* dataset) {
 
 // Queries the device for the maximum shared memory available in a block.
 // We know this is large enough (over 100kb) but it's good to check
-int maxCudaSharedMemory() {
+size_t maxCudaSharedMemory() {
   int device;
   cudaGetDevice(&device);
-  int maxOpt = 0, maxDefault = 0, maxThreadsPB = 0;
-  cudaDeviceGetAttribute(&maxOpt, cudaDevAttrMaxSharedMemoryPerBlockOptin, device);
+  int maxDefault = 0;
   cudaDeviceGetAttribute(&maxDefault, cudaDevAttrMaxSharedMemoryPerBlock, device);
-  cudaDeviceGetAttribute(&maxThreadsPB, cudaDevAttrMaxThreadsPerBlock, device);
-  return maxOpt ? maxOpt : maxDefault;
+  return (size_t)maxDefault;
 }
 
 // Perform the Cuda setup and calling. Requires a result array that will be filled in.
@@ -139,10 +137,10 @@ int* hostKNN(float* h_test_matrix, float* h_train_matrix,      // data matrices
   // 1 thread per test. Group into blocks of 256
   int threadsPerBlock = 256;
   int blocksPerGrid = (test_num_instances + threadsPerBlock - 1) / threadsPerBlock;
-  int sharedMemorySize = threadsPerBlock * (2 * k * sizeof(float) + num_classes * sizeof(int));
-  int maxShm = maxCudaSharedMemory();
+  size_t sharedMemorySize = threadsPerBlock * (2 * k * sizeof(float) + num_classes * sizeof(int));
+  size_t maxShm = maxCudaSharedMemory();
   if (sharedMemorySize > maxShm) {
-    printf("Requires too much shared memory per block. Required = %d. Available = %d\n", sharedMemorySize, maxShm);
+    printf("Requires too much shared memory per block. Required = %zu. Available = %zu\n", sharedMemorySize, maxShm);
     exit(2);
   }
   printf("%d blocks of %d threads.\n", blocksPerGrid, threadsPerBlock);
@@ -156,12 +154,16 @@ int* hostKNN(float* h_test_matrix, float* h_train_matrix,      // data matrices
   cudaError_t err = cudaGetLastError();
 
   if (err != cudaSuccess) {
-    printf("CUDA Error: %s\n", cudaGetErrorString(err));
+    printf("CUDA Error on launching the kernel: %s\n", cudaGetErrorString(err));
     exit(3);
   }
   // end timer
   cudaEventRecord(stop);
-  cudaEventSynchronize(stop);
+  err = cudaEventSynchronize(stop);
+  if (err != cudaSuccess) {
+    printf("CUDA Error during kernel execution: %s\n", cudaGetErrorString(err));
+    exit(4);
+  }
   if (pMilliseconds != nullptr) {
     cudaEventElapsedTime(pMilliseconds, start, stop);
   }
@@ -171,6 +173,8 @@ int* hostKNN(float* h_test_matrix, float* h_train_matrix,      // data matrices
   cudaMemcpy(h_predictions, d_predictions, test_num_instances * sizeof(int), cudaMemcpyDeviceToHost);
 
   // clean up the device resources
+  cudaEventDestroy(start);
+  cudaEventDestroy(stop);
   cudaFree(d_test_matrix);
   cudaFree(d_train_matrix);
   cudaFree(d_predictions);
@@ -186,6 +190,7 @@ int main(int argc, char *argv[]) {
   }
 
   // k value for the k-nearest neighbors
+  errno = 0;
   int k = strtol(argv[3], NULL, 10);
   if (errno != 0) {
     printf("k value must be an integer. Got '%s'\n", argv[3]);
@@ -211,7 +216,7 @@ int main(int argc, char *argv[]) {
   // Calculate the accuracy
   float accuracy = computeAccuracy(confusionMatrix, test);
 
-  printf("The %i-NN classifier for %u test instances and %u train instances required %f ms GPU time for GPU. Accuracy was %.2f%%\n",
+  printf("The %i-NN classifier for %d test instances and %d train instances required %f ms GPU time for GPU. Accuracy was %.2f%%\n",
            k, test_num_instances, train_num_instances, milliseconds, accuracy);
 
   free(confusionMatrix);
@@ -219,4 +224,3 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
-
