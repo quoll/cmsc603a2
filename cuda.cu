@@ -124,7 +124,7 @@ int* hostKNN(float* h_test_matrix, float* h_train_matrix,      // data matrices
   cudaMalloc(&d_train_matrix, trainElements * sizeof(float));
 
   int *d_predictions;
-  cudaMalloc(&d_predictions, resultSizeInBytes);
+  cudaMalloc(&d_predictions, test_num_instances * sizeof(int));
 
   // copy data to the device
   cudaMemcpy(d_test_matrix, h_test_matrix, testElements * sizeof(float), cudaMemcpyHostToDevice);
@@ -163,12 +163,12 @@ int* hostKNN(float* h_test_matrix, float* h_train_matrix,      // data matrices
   cudaEventRecord(stop);
   cudaEventSynchronize(stop);
   if (pMilliseconds != nullptr) {
-    cudaEventElapsedTime(&milliseconds, start, stop);
+    cudaEventElapsedTime(pMilliseconds, start, stop);
   }
 
   // allocate host memory for the results and retrieve them from the device
   int* h_predictions = (int*)malloc(test_num_instances * sizeof(int));
-  cudaMemcpy(h_predictions, d_predictions, resultSizeInBytes, cudaMemcpyDeviceToHost);
+  cudaMemcpy(h_predictions, d_predictions, test_num_instances * sizeof(int), cudaMemcpyDeviceToHost);
 
   // clean up the device resources
   cudaFree(d_test_matrix);
