@@ -110,12 +110,13 @@ int maxCudaSharedMemory() {
 }
 
 // Perform the Cuda setup and calling. Requires a result array that will be filled in.
-// Returns the milliseconds for execution.
-float hostKNN(int mpi_rank, mpi_num_processes,                  // MPI location
-              float* test_matrix, float* h_train_matrix,        // data matrices
-              int test_num_instances, int train_num_instances,  // limits of data matrices
-              int num_attributes, int num_classes, int k,       // dimensions
-              float* pMilliseconds) {                           // timing data
+// The rank 0 process returns a new predictions array that has to be freed
+// Updates the float value for the millisecond pointer
+int* hostKNN(int mpi_rank, mpi_num_processes,                  // MPI location
+             float* test_matrix, float* h_train_matrix,        // data matrices
+             int test_num_instances, int train_num_instances,  // limits of data matrices
+             int num_attributes, int num_classes, int k,       // dimensions
+             float* pMilliseconds) {                           // timing data
 
   // determine the appropriate split for MPI
   int baseSize = test_num_instances / mpi_num_processes;
@@ -258,7 +259,7 @@ int main(int argc, char *argv[]) {
                              test_num_instances, train_num_instances,
                              train->num_attributes(), train->num_classes(), k, &milliseconds);
 
-  if (mpt_rank == 0) {
+  if (mpi_rank == 0) {
     // Compute the confusion matrix
     int* confusionMatrix = computeConfusionMatrix(predictions, test);
     // Calculate the accuracy
