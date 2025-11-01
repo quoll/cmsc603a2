@@ -1,0 +1,16 @@
+## Details
+The assignment consists of implementing the KNN algorithm on the GPU using the CUDA programming model and comparing its performance with the CPU single-thread, multi-thread, and MPI implementations. Conduct all the code optimizations you consider relevant to speed up its execution, as long as the output is correct (accuracy of sequential / MPI / GPU must be the same). You can reuse the code from the previous assignment to extend it to the GPU.
+
+## Activities:
+
+Implement a CUDA version of the KNN algorithm on the GPU.
+Run the CUDA code on maple.cs.vcu.edu and athena.hprc.vcu.edu on the small, medium, and large datasets, respectively.
+Analyze the performance using different kernel configurations (e.g. different number of threads per block, different code approaches to solving the problem with/without shared memory, etc.) to identify which approach is the most efficient. You can deliver different versions of the code with different strategies. Please make sure to describe in the report what are the differences among the versions.
+Optional: extra credit: the GPU code is scalable to multiple GPUs using MPI.
+
+## Deliverables:
+
+Source code. Provide the KNN implementation using CUDA. You can deliver several implementations, make sure to describe their differences.
+Slurm scripts to run (correctly) the code on athena.hprc.vcu.edu.
+Report with the methodology followed and results (including tables and figures).
+Compress the source code (all files including code, scripts, datasets, and Makefile) and the Excel report into a .zip file. Upload the .zip file to Canvas.
