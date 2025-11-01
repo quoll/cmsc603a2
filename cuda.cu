@@ -109,12 +109,12 @@ int maxCudaSharedMemory() {
 }
 
 // Perform the Cuda setup and calling. Requires a result array that will be filled in.
-// Returns the milliseconds for execution.
-float hostKNN(int* h_results, int resultSizeInBytes,            // result matrix to fill in
-              float* h_test_matrix, float* h_train_matrix,      // data matrices
-              int test_num_instances, int train_num_instances,  // limits of data matrices
-              int num_attributes,                               // dimensions
-              int num_classes, int k) {
+// Returns a new predictions array that must be freed.
+// Updates the milliseconds pointer with the time for execution.
+int* hostKNN(float* h_test_matrix, float* h_train_matrix,      // data matrices
+             int test_num_instances, int train_num_instances,  // limits of data matrices
+             int num_attributes, int num_classes, int k,       // dimensions
+             float* pMilliseconds) {
 
   // allocate memory on the device
   float *d_test_matrix, *d_train_matrix;
@@ -135,7 +135,6 @@ float hostKNN(int* h_results, int resultSizeInBytes,            // result matrix
   cudaEvent_t start, stop;
   cudaEventCreate(&start);
   cudaEventCreate(&stop);
-  float milliseconds = 0;
 
   // 1 thread per test. Group into blocks of 256
   int threadsPerBlock = 256;
@@ -163,18 +162,21 @@ float hostKNN(int* h_results, int resultSizeInBytes,            // result matrix
   // end timer
   cudaEventRecord(stop);
   cudaEventSynchronize(stop);
-  cudaEventElapsedTime(&milliseconds, start, stop);
+  if (pMilliseconds != nullptr) {
+    cudaEventElapsedTime(&milliseconds, start, stop);
+  }
 
-  // retrieve the result
-  cudaMemcpy(h_results, d_predictions, resultSizeInBytes, cudaMemcpyDeviceToHost);
+  // allocate host memory for the results and retrieve them from the device
+  int* h_predictions = (int*)malloc(test_num_instances * sizeof(int));
+  cudaMemcpy(h_predictions, d_predictions, resultSizeInBytes, cudaMemcpyDeviceToHost);
 
   // clean up the device resources
   cudaFree(d_test_matrix);
   cudaFree(d_train_matrix);
   cudaFree(d_predictions);
 
-  // Results are in the provided result array
-  return milliseconds;
+  // Return the results
+  return h_predictions;
 }
 
 int main(int argc, char *argv[]) {
@@ -199,18 +201,13 @@ int main(int argc, char *argv[]) {
   int test_num_instances = test->num_instances();
   int train_num_instances = train->num_instances();
 
-  // Allocate host memory for the result.
-  // Allocation happens here because we're freeing here.
-  int resultSizeInBytes = test_num_instances * sizeof(int);
-  int* results = (int*)malloc(resultSizeInBytes);
-
-  float milliseconds = hostKNN(results, resultSizeInBytes,
-                               test->get_dataset_matrix(), train->get_dataset_matrix(),
-                               test_num_instances, train_num_instances,
-                               train->num_attributes(), train->num_classes(), k);
+  float milliseconds = 0.0;
+  int* predictions = hostKNN(test->get_dataset_matrix(), train->get_dataset_matrix(),
+                             test_num_instances, train_num_instances,
+                             train->num_attributes(), train->num_classes(), k, &milliseconds);
 
   // Compute the confusion matrix
-  int* confusionMatrix = computeConfusionMatrix(results, test);
+  int* confusionMatrix = computeConfusionMatrix(predictions, test);
   // Calculate the accuracy
   float accuracy = computeAccuracy(confusionMatrix, test);
 
@@ -218,8 +215,7 @@ int main(int argc, char *argv[]) {
            k, test_num_instances, train_num_instances, milliseconds, accuracy);
 
   free(confusionMatrix);
-
-  free(results);
+  free(predictions);
 
   return 0;
 }
