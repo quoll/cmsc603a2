@@ -8,23 +8,25 @@ GENCODES := \
   -gencode arch=compute_80,code=compute_80 \
   -gencode arch=compute_90,code=compute_90
 
-NVCCFLAGS := -O3 -std=c++17 $(GENCODES) -ccbin=$(MPICXX)
-INCLUDES  := -I libarff
+NVCCBASE := -O3 -std=c++17 $(GENCODES)
+INCLUDES := -I libarff
 LIBARFF_SRCS := \
   libarff/arff_attr.cpp libarff/arff_data.cpp libarff/arff_instance.cpp \
   libarff/arff_lexer.cpp libarff/arff_parser.cpp libarff/arff_scanner.cpp \
   libarff/arff_token.cpp libarff/arff_utils.cpp libarff/arff_value.cpp
 
-TARGETS   := cuda cuda-mpi
-CU_SRCS   := cuda.cu cuda-mpi.cu
+TARGETS := cuda cuda-mpi cuda-single
 
 all: $(TARGETS)
 
-serial: serial.cpp
-	g++ -std=c++11 -o serial serial.cpp -I libarff libarff/arff_attr.cpp libarff/arff_data.cpp libarff/arff_instance.cpp libarff/arff_lexer.cpp libarff/arff_parser.cpp libarff/arff_scanner.cpp libarff/arff_token.cpp libarff/arff_utils.cpp libarff/arff_value.cpp
+cuda cuda-single: % : %.cu $(LIBARFF_SRCS)
+	$(NVCC) $(NVCCBASE) -ccbin=$(CXX) $(INCLUDES) $^ -o $@
 
-$(TARGETS): % : %.cu $(LIBARFF_SRCS)
-	$(NVCC) $(NVCCFLAGS) $(INCLUDES) $^ -o $@
+cuda-mpi: cuda-mpi.cu $(LIBARFF_SRCS)
+	$(NVCC) $(NVCCBASE) -ccbin=$(MPICXX) $(INCLUDES) $^ -o $@
+
+serial: serial.cpp
+	g++ -std=c++11 -o serial serial.cpp $(INCLUDES) $(LIBARFF_SRCS)
 
 clean:
 	rm -f serial $(TARGETS)
