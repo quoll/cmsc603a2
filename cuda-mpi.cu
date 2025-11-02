@@ -266,11 +266,17 @@ int main(int argc, char *argv[]) {
   int test_num_instances = test->num_instances();
   int train_num_instances = train->num_instances();
 
+  // Initialize time measurement
+  struct timespec start, end;
+  clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+
   float milliseconds = 0.0;
   int* predictions = hostKNN(mpi_rank, mpi_num_processes,
                              test->get_dataset_matrix(), train->get_dataset_matrix(),
                              test_num_instances, train_num_instances,
                              train->num_attributes(), train->num_classes(), k, &milliseconds);
+
+  clock_gettime(CLOCK_MONOTONIC_RAW, &end);
 
   if (mpi_rank == 0) {
     // Compute the confusion matrix
@@ -278,8 +284,10 @@ int main(int argc, char *argv[]) {
     // Calculate the accuracy
     float accuracy = computeAccuracy(confusionMatrix, test);
 
-    printf("The %i-NN classifier for %d test instances and %d train instances required %f ms GPU time for GPU. Accuracy was %.2f%%\n",
-             k, test_num_instances, train_num_instances, milliseconds, accuracy);
+    uint64_t time_difference = (1000000000L * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec) / 1e6;
+
+    printf("The %i-NN classifier for %d test instances and %d train instances required %f ms GPU time for GPU, %llu ms time in total. Accuracy was %.2f%%\n",
+             k, test_num_instances, train_num_instances, milliseconds, (long long unsigned int)time_difference, accuracy);
 
     free(confusionMatrix);
     free(predictions);

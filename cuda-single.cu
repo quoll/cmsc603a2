@@ -26,54 +26,56 @@ __global__ void kNN(int* predictions,  // the result
 
   int tid = blockDim.x * blockIdx.x + threadIdx.x;
 
-  // use 1 thread per test entry
-  if (tid < test_num_instances) {
-    float* sharedCandidates = (float*)smem;
-    float* candidates = sharedCandidates + (threadIdx.x * 2 * k);
+  // limit to only one thread
+  if (tid == 0) {
+    for (int testInstance = 0; testInstance < test_num_instances; testInstance++) {
+      float* sharedCandidates = (float*)smem;
+      float* candidates = sharedCandidates + (threadIdx.x * 2 * k);
 
-    int* sharedClassCounts = (int*)(smem + (blockDim.x * 2 * k * sizeof(float)));
-    int* classCounts = sharedClassCounts + threadIdx.x * num_classes;
+      int* sharedClassCounts = (int*)(smem + (blockDim.x * 2 * k * sizeof(float)));
+      int* classCounts = sharedClassCounts + threadIdx.x * num_classes;
 
-    for (int i = 0; i < k * 2; i++) candidates[i] = FLT_MAX;
-    for (int i = 0; i < num_classes; i++) classCounts[i] = 0;
+      for (int i = 0; i < k * 2; i++) candidates[i] = FLT_MAX;
+      for (int i = 0; i < num_classes; i++) classCounts[i] = 0;
 
-    // this thread searches the entire train list to get the top k
-    int testBase = tid * num_attributes;
-    for (int keyIndex = 0; keyIndex < train_num_instances; keyIndex++) {
-      int trainBase = keyIndex * num_attributes;
-      float distSq = distanceSq(&test_matrix[testBase], &train_matrix[trainBase], num_attributes);
-      for (int c = 0; c < k; c++){
-        if (distSq < candidates[2 * c]) {
-          // Found a new candidate
-          // Shift previous candidates down by one
-          for (int x = k - 2; x >= c; x--) {
-            candidates[2 * x + 2] = candidates[2 * x];
-            candidates[2 * x + 3] = candidates[2 * x + 1];
+      // this thread searches the entire train list to get the top k
+      int testBase = testInstance * num_attributes;
+      for (int keyIndex = 0; keyIndex < train_num_instances; keyIndex++) {
+        int trainBase = keyIndex * num_attributes;
+        float distSq = distanceSq(&test_matrix[testBase], &train_matrix[trainBase], num_attributes);
+        for (int c = 0; c < k; c++){
+          if (distSq < candidates[2 * c]) {
+            // Found a new candidate
+            // Shift previous candidates down by one
+            for (int x = k - 2; x >= c; x--) {
+              candidates[2 * x + 2] = candidates[2 * x];
+              candidates[2 * x + 3] = candidates[2 * x + 1];
+            }
+
+            // Set key vector as potential k NN
+            candidates[2 * c] = distSq;
+            candidates[2 * c + 1] = train_matrix[trainBase + num_attributes - 1]; // class value
+            break;
           }
-
-          // Set key vector as potential k NN
-          candidates[2 * c] = distSq;
-          candidates[2 * c + 1] = train_matrix[trainBase + num_attributes - 1]; // class value
-          break;
         }
       }
-    }
 
-    // Bincount the candidate labels and pick the most common
-    for (int i = 0; i < k; i++) {
-      classCounts[(int)candidates[2 * i + 1]]++;
-    }
-
-    int max_value = -1;
-    int max_class = 0;
-    for (int i = 0; i < num_classes; i++) {
-      if (classCounts[i] > max_value) {
-        max_value = classCounts[i];
-        max_class = i;
+      // Bincount the candidate labels and pick the most common
+      for (int i = 0; i < k; i++) {
+        classCounts[(int)candidates[2 * i + 1]]++;
       }
-    }
 
-    predictions[tid] = max_class;
+      int max_value = -1;
+      int max_class = 0;
+      for (int i = 0; i < num_classes; i++) {
+        if (classCounts[i] > max_value) {
+          max_value = classCounts[i];
+          max_class = i;
+        }
+      }
+
+      predictions[testInstance] = max_class;
+    }
   }
 }
 
@@ -143,7 +145,7 @@ int* hostKNN(float* h_test_matrix, float* h_train_matrix,      // data matrices
     printf("Requires too much shared memory per block. Required = %zu. Available = %zu\n", sharedMemorySize, maxShm);
     exit(2);
   }
-  printf("%d blocks of %d threads.\n", blocksPerGrid, threadsPerBlock);
+  printf("%d blocks of %d threads. Only 1 thread in use.\n", blocksPerGrid, threadsPerBlock);
 
   // start timer
   cudaEventRecord(start);
@@ -206,7 +208,7 @@ int main(int argc, char *argv[]) {
   int test_num_instances = test->num_instances();
   int train_num_instances = train->num_instances();
 
-  // Initialize time measurement
+  // Initialize overall time measurement
   struct timespec start, end;
   clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 

@@ -1,0 +1,62 @@
+Loading modulefiles version 2021.11
+Running MPI/CUDA on 1 node(s), 6 ranks, 1 CPU/rank, ? GPU/rank
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 160 test instances and 1184 train instances required 0.967680 ms GPU time for GPU, 3023 ms time in total. Accuracy was 85.00%
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 160 test instances and 1184 train instances required 0.906240 ms GPU time for GPU, 3107 ms time in total. Accuracy was 85.00%
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 160 test instances and 1184 train instances required 1.287168 ms GPU time for GPU, 3203 ms time in total. Accuracy was 85.00%
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 160 test instances and 1184 train instances required 0.912384 ms GPU time for GPU, 3090 ms time in total. Accuracy was 85.00%
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 160 test instances and 1184 train instances required 1.210368 ms GPU time for GPU, 3300 ms time in total. Accuracy was 85.00%
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 160 test instances and 1184 train instances required 0.915456 ms GPU time for GPU, 3048 ms time in total. Accuracy was 85.00%
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 160 test instances and 1184 train instances required 0.962560 ms GPU time for GPU, 3490 ms time in total. Accuracy was 85.00%
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 160 test instances and 1184 train instances required 1.107968 ms GPU time for GPU, 2965 ms time in total. Accuracy was 85.00%
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 160 test instances and 1184 train instances required 0.946176 ms GPU time for GPU, 3511 ms time in total. Accuracy was 85.00%
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 160 test instances and 1184 train instances required 0.899072 ms GPU time for GPU, 3116 ms time in total. Accuracy was 85.00%
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 740 test instances and 14708 train instances required 16.561089 ms GPU time for GPU, 3825 ms time in total. Accuracy was 27.57%
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 740 test instances and 14708 train instances required 25.196159 ms GPU time for GPU, 3555 ms time in total. Accuracy was 27.57%
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 740 test instances and 14708 train instances required 12.584800 ms GPU time for GPU, 3886 ms time in total. Accuracy was 27.57%
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 740 test instances and 14708 train instances required 16.514112 ms GPU time for GPU, 3829 ms time in total. Accuracy was 27.57%
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 740 test instances and 14708 train instances required 18.352064 ms GPU time for GPU, 3900 ms time in total. Accuracy was 27.57%
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 740 test instances and 14708 train instances required 12.429408 ms GPU time for GPU, 3980 ms time in total. Accuracy was 27.57%
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 740 test instances and 14708 train instances required 16.483583 ms GPU time for GPU, 3995 ms time in total. Accuracy was 27.57%
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 740 test instances and 14708 train instances required 13.619936 ms GPU time for GPU, 3774 ms time in total. Accuracy was 27.57%
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 740 test instances and 14708 train instances required 14.104288 ms GPU time for GPU, 3797 ms time in total. Accuracy was 27.57%
+Up to 1 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 740 test instances and 14708 train instances required 12.918048 ms GPU time for GPU, 3935 ms time in total. Accuracy was 27.57%
+Up to 3 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 218.761444 ms GPU time for GPU, 8079 ms time in total. Accuracy was 99.48%
+Up to 3 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 191.537064 ms GPU time for GPU, 7998 ms time in total. Accuracy was 99.48%
+Up to 3 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 223.213181 ms GPU time for GPU, 7906 ms time in total. Accuracy was 99.48%
+Up to 3 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 212.675964 ms GPU time for GPU, 8002 ms time in total. Accuracy was 99.48%
+Up to 3 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 216.943390 ms GPU time for GPU, 7975 ms time in total. Accuracy was 99.48%
+Up to 3 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 212.952164 ms GPU time for GPU, 7839 ms time in total. Accuracy was 99.48%
+Up to 3 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 216.567230 ms GPU time for GPU, 8233 ms time in total. Accuracy was 99.48%
+Up to 3 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 222.014267 ms GPU time for GPU, 7903 ms time in total. Accuracy was 99.48%
+Up to 3 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 216.299271 ms GPU time for GPU, 7839 ms time in total. Accuracy was 99.48%
+Up to 3 blocks of 256 threads, in 6 processes.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 226.932068 ms GPU time for GPU, 8000 ms time in total. Accuracy was 99.48%

@@ -1,0 +1,61 @@
+Running CUDA version
+1 blocks of 256 threads.
+The 3-NN classifier for 160 test instances and 1184 train instances required 0.990208 ms GPU time for GPU, 182 ms time in total. Accuracy was 85.00%
+1 blocks of 256 threads.
+The 3-NN classifier for 160 test instances and 1184 train instances required 0.973824 ms GPU time for GPU, 166 ms time in total. Accuracy was 85.00%
+1 blocks of 256 threads.
+The 3-NN classifier for 160 test instances and 1184 train instances required 0.982016 ms GPU time for GPU, 159 ms time in total. Accuracy was 85.00%
+1 blocks of 256 threads.
+The 3-NN classifier for 160 test instances and 1184 train instances required 0.994336 ms GPU time for GPU, 162 ms time in total. Accuracy was 85.00%
+1 blocks of 256 threads.
+The 3-NN classifier for 160 test instances and 1184 train instances required 0.975904 ms GPU time for GPU, 165 ms time in total. Accuracy was 85.00%
+1 blocks of 256 threads.
+The 3-NN classifier for 160 test instances and 1184 train instances required 0.957440 ms GPU time for GPU, 157 ms time in total. Accuracy was 85.00%
+1 blocks of 256 threads.
+The 3-NN classifier for 160 test instances and 1184 train instances required 0.923680 ms GPU time for GPU, 140 ms time in total. Accuracy was 85.00%
+1 blocks of 256 threads.
+The 3-NN classifier for 160 test instances and 1184 train instances required 0.913440 ms GPU time for GPU, 126 ms time in total. Accuracy was 85.00%
+1 blocks of 256 threads.
+The 3-NN classifier for 160 test instances and 1184 train instances required 0.916480 ms GPU time for GPU, 116 ms time in total. Accuracy was 85.00%
+1 blocks of 256 threads.
+The 3-NN classifier for 160 test instances and 1184 train instances required 0.892960 ms GPU time for GPU, 111 ms time in total. Accuracy was 85.00%
+3 blocks of 256 threads.
+The 3-NN classifier for 740 test instances and 14708 train instances required 12.903200 ms GPU time for GPU, 126 ms time in total. Accuracy was 27.57%
+3 blocks of 256 threads.
+The 3-NN classifier for 740 test instances and 14708 train instances required 12.897984 ms GPU time for GPU, 123 ms time in total. Accuracy was 27.57%
+3 blocks of 256 threads.
+The 3-NN classifier for 740 test instances and 14708 train instances required 12.906752 ms GPU time for GPU, 123 ms time in total. Accuracy was 27.57%
+3 blocks of 256 threads.
+The 3-NN classifier for 740 test instances and 14708 train instances required 12.902592 ms GPU time for GPU, 121 ms time in total. Accuracy was 27.57%
+3 blocks of 256 threads.
+The 3-NN classifier for 740 test instances and 14708 train instances required 12.898496 ms GPU time for GPU, 124 ms time in total. Accuracy was 27.57%
+3 blocks of 256 threads.
+The 3-NN classifier for 740 test instances and 14708 train instances required 12.908256 ms GPU time for GPU, 122 ms time in total. Accuracy was 27.57%
+3 blocks of 256 threads.
+The 3-NN classifier for 740 test instances and 14708 train instances required 12.905888 ms GPU time for GPU, 122 ms time in total. Accuracy was 27.57%
+3 blocks of 256 threads.
+The 3-NN classifier for 740 test instances and 14708 train instances required 12.904032 ms GPU time for GPU, 122 ms time in total. Accuracy was 27.57%
+3 blocks of 256 threads.
+The 3-NN classifier for 740 test instances and 14708 train instances required 12.908256 ms GPU time for GPU, 124 ms time in total. Accuracy was 27.57%
+3 blocks of 256 threads.
+The 3-NN classifier for 740 test instances and 14708 train instances required 12.901152 ms GPU time for GPU, 136 ms time in total. Accuracy was 27.57%
+14 blocks of 256 threads.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 53.694496 ms GPU time for GPU, 171 ms time in total. Accuracy was 99.48%
+14 blocks of 256 threads.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 53.698208 ms GPU time for GPU, 172 ms time in total. Accuracy was 99.48%
+14 blocks of 256 threads.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 53.699615 ms GPU time for GPU, 172 ms time in total. Accuracy was 99.48%
+14 blocks of 256 threads.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 53.691872 ms GPU time for GPU, 175 ms time in total. Accuracy was 99.48%
+14 blocks of 256 threads.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 53.702015 ms GPU time for GPU, 171 ms time in total. Accuracy was 99.48%
+14 blocks of 256 threads.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 53.692768 ms GPU time for GPU, 173 ms time in total. Accuracy was 99.48%
+14 blocks of 256 threads.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 53.698399 ms GPU time for GPU, 172 ms time in total. Accuracy was 99.48%
+14 blocks of 256 threads.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 53.706753 ms GPU time for GPU, 174 ms time in total. Accuracy was 99.48%
+14 blocks of 256 threads.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 53.702785 ms GPU time for GPU, 173 ms time in total. Accuracy was 99.48%
+14 blocks of 256 threads.
+The 3-NN classifier for 3436 test instances and 61606 train instances required 53.683872 ms GPU time for GPU, 175 ms time in total. Accuracy was 99.48%
