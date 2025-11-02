@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Usage: ./makea2 [target]    # default target: cuda-mpi
 set -euo pipefail
-TARGET="${1:-cuda-mpi}"
+TARGET="${1:-all}"
 SRCDIR="${SRCDIR:-$HOME/dev/a2}"
 PARTITION="${PARTITION:-gpu}"
 GPUS="${GPUS:-1}"
