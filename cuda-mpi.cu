@@ -104,13 +104,13 @@ size_t maxCudaSharedMemory() {
   cudaGetDevice(&device);
   int maxDefault = 0;
   cudaDeviceGetAttribute(&maxDefault, cudaDevAttrMaxSharedMemoryPerBlock, device);
-  return (size_t)maxOpt;
+  return (size_t)maxDefault;
 }
 
 // Perform the Cuda setup and calling. Requires a result array that will be filled in.
 // The rank 0 process returns a new predictions array that has to be freed
 // Updates the float value for the millisecond pointer
-int* hostKNN(int mpi_rank, mpi_num_processes,                  // MPI location
+int* hostKNN(int mpi_rank, int mpi_num_processes,              // MPI location
              float* test_matrix, float* h_train_matrix,        // data matrices
              int test_num_instances, int train_num_instances,  // limits of data matrices
              int num_attributes, int num_classes, int k,       // dimensions
@@ -125,7 +125,7 @@ int* hostKNN(int mpi_rank, mpi_num_processes,                  // MPI location
     groupSize = baseSize + 1;
     offset = mpi_rank * groupSize;
   } else {
-    groupSize = base_size;
+    groupSize = baseSize;
     offset = mpi_rank * groupSize + remainder;
   }
 
@@ -141,7 +141,7 @@ int* hostKNN(int mpi_rank, mpi_num_processes,                  // MPI location
   cudaMalloc(&d_predictions, groupSize * sizeof(int));
 
   // set the local test matrix to the group
-  float* h_test_matrix = test_matrix + offset;
+  float* h_test_matrix = test_matrix + offset * num_attributes;
 
   // copy data to the device
   cudaMemcpy(d_test_matrix, h_test_matrix, testElements * sizeof(float), cudaMemcpyHostToDevice);
@@ -154,20 +154,23 @@ int* hostKNN(int mpi_rank, mpi_num_processes,                  // MPI location
 
   // 1 thread per test. Group into blocks of 256
   int threadsPerBlock = 256;
-  int blocksPerGrid = (test_num_instances + threadsPerBlock - 1) / threadsPerBlock;
+  int blocksPerGrid = (groupSize + threadsPerBlock - 1) / threadsPerBlock;
   size_t sharedMemorySize = threadsPerBlock * (2 * k * sizeof(float) + num_classes * sizeof(int));
   size_t maxShm = maxCudaSharedMemory();
   if (sharedMemorySize > maxShm) {
     printf("Requires too much shared memory per block. Required = %zu. Available = %zu\n", sharedMemorySize, maxShm);
     exit(2);
   }
-  printf("%d blocks of %d threads.\n", blocksPerGrid, threadsPerBlock);
+  if (mpi_rank == 0) {
+    // this is not really needed, but we can report it on the rank 0 process
+    printf("Up to %d blocks of %d threads, in %d processes.\n", blocksPerGrid, threadsPerBlock, mpi_num_processes);
+  }
 
   // start timer
   cudaEventRecord(start);
 
   kNN<<<blocksPerGrid, threadsPerBlock, sharedMemorySize>>>(d_predictions, d_test_matrix, d_train_matrix,
-                                                            test_num_instances, train_num_instances,
+                                                            groupSize, train_num_instances,
                                                             num_attributes, num_classes, k);
 
   cudaError_t err = cudaGetLastError();
@@ -178,9 +181,13 @@ int* hostKNN(int mpi_rank, mpi_num_processes,                  // MPI location
   }
   // end timer
   cudaEventRecord(stop);
-  cudaEventSynchronize(stop);
+  err = cudaEventSynchronize(stop);
+    if (err != cudaSuccess) {
+    printf("CUDA Error during kernel execution: %s\n", cudaGetErrorString(err));
+    exit(4);
+  }
   if (pMilliseconds != nullptr) {
-    cudaEventElapsedTime(&milliseconds, start, stop);
+    cudaEventElapsedTime(pMilliseconds, start, stop);
   }
 
   // retrieve the result
@@ -188,6 +195,8 @@ int* hostKNN(int mpi_rank, mpi_num_processes,                  // MPI location
   cudaMemcpy(h_predictions, d_predictions, groupSize * sizeof(int), cudaMemcpyDeviceToHost);
 
   // clean up the device resources
+  cudaEventDestroy(start);
+  cudaEventDestroy(stop);
   cudaFree(d_test_matrix);
   cudaFree(d_train_matrix);
   cudaFree(d_predictions);
@@ -201,20 +210,24 @@ int* hostKNN(int mpi_rank, mpi_num_processes,                  // MPI location
     predictions = (int*)calloc(test_num_instances, sizeof(int));
     recvcounts = (int*)malloc(mpi_num_processes * sizeof(int));
     offsets = (int*)malloc(mpi_num_processes * sizeof(int));
-    int ibase_size = base_size + 1;
+    int ibaseSize = baseSize + 1;
     for (int i = 0; i < mpi_num_processes; i++) {
       if (i < remainder) {
-        recvcounts[i] = ibase_size;
-        offsets[i] = i * ibase_size;
+        recvcounts[i] = ibaseSize;
+        offsets[i] = i * ibaseSize;
       } else {
-        recvcounts[i] = base_size;
-        offsets[i] = i * base_size + remainder;
+        recvcounts[i] = baseSize;
+        offsets[i] = i * baseSize + remainder;
       }
     }
   }
   MPI_Gatherv(h_predictions, groupSize, MPI_INT, predictions, recvcounts, offsets, MPI_INT, 0, MPI_COMM_WORLD);
   if (pMilliseconds != nullptr) {
-    MPI_Reduce(pMilliseconds, pMilliseconds, 1, MPI_FLOAT, MPI_MAX, 0, MPI_COMM_WORLD);
+    if (mpi_rank == 0) {
+      MPI_Reduce(MPI_IN_PLACE, pMilliseconds, 1, MPI_FLOAT, MPI_MAX, 0, MPI_COMM_WORLD);
+    } else {
+      MPI_Reduce(pMilliseconds, nullptr, 1, MPI_FLOAT, MPI_MAX, 0, MPI_COMM_WORLD);
+    }
   }
   if (mpi_rank == 0) {
     free(offsets);
@@ -254,7 +267,8 @@ int main(int argc, char *argv[]) {
   int train_num_instances = train->num_instances();
 
   float milliseconds = 0.0;
-  int* predictions = hostKNN(test->get_dataset_matrix(), train->get_dataset_matrix(),
+  int* predictions = hostKNN(mpi_rank, mpi_num_processes,
+                             test->get_dataset_matrix(), train->get_dataset_matrix(),
                              test_num_instances, train_num_instances,
                              train->num_attributes(), train->num_classes(), k, &milliseconds);
 
@@ -264,7 +278,7 @@ int main(int argc, char *argv[]) {
     // Calculate the accuracy
     float accuracy = computeAccuracy(confusionMatrix, test);
 
-    printf("The %i-NN classifier for %u test instances and %u train instances required %f ms GPU time for GPU. Accuracy was %.2f%%\n",
+    printf("The %i-NN classifier for %d test instances and %d train instances required %f ms GPU time for GPU. Accuracy was %.2f%%\n",
              k, test_num_instances, train_num_instances, milliseconds, accuracy);
 
     free(confusionMatrix);
@@ -274,4 +288,3 @@ int main(int argc, char *argv[]) {
   int mpi = MPI_Finalize();
   return (mpi == MPI_SUCCESS) ? 0 : mpi;
 }
-

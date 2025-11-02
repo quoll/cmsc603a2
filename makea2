@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Usage: ./makea2 [target]    # default target: cuda-mpi
+set -euo pipefail
+TARGET="${1:-cuda-mpi}"
+SRCDIR="${SRCDIR:-$HOME/dev/a2}"
+PARTITION="${PARTITION:-gpu}"
+GPUS="${GPUS:-1}"
+TIME="${TIME:-00:10:00}"
+
+srun --pty --time="$TIME" -p "$PARTITION" --gres="gpu:${GPUS}" \
+     --chdir="$SRCDIR" \
+     bash -lc 'module purge; module load cuda mpi; make '"$TARGET"
